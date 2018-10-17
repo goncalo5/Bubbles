@@ -1,36 +1,9 @@
 #!/usr/bin/env python
 import math
 import random
-import pygame
-from pygame.locals import *
-pygame.init()
-
-# SETTINGS
-# colors
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-RED = (200, 0, 0)
-GREEN = (0, 200, 0)
-BLUE = (0, 0, 255)
-BRIGHT_RED = (255, 0, 0)
-BRIGHT_GREEN = (0, 255, 0)
-MAROON = (128,  0,   0)
-
-# Screen
-DISPLAY_WIDTH = 600
-DISPLAY_HEIGHT = 600
-FPS = 5
-
-# Bubbles
-POSSIBLE_COLORS = [WHITE, GREEN]
-BUBBLE_SIZE = 50
-BUBBLE_SPEED = 20
-
-# Pointer
-POINTER_RATE_X = 0.5
-POINTER_RATE_Y = 0.1
-POINTER_RATE_SIZE = 0.1
-POINTER_COLOR = RED
+import pygame as pg
+from settings import *
+pg.init()
 
 
 class Bubble(object):
@@ -43,13 +16,13 @@ class Bubble(object):
         self.dy = 0
         self.radius = int(BUBBLE_SIZE / 2.)
         self.speed = BUBBLE_SPEED
-        self.obj = pygame.draw.circle(game.display, self.color,
-                                      (self.x, self.y),
-                                      self.radius)
+        self.obj = pg.draw.circle(game.display, self.color,
+                                  (self.x, self.y),
+                                  self.radius)
 
     def handle_events(self, game, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key in [pygame.K_RIGHT]:
+        if event.type == pg.KEYDOWN:
+            if event.key in [pg.K_RIGHT]:
                 pass
 
     def update(self, game):
@@ -66,9 +39,9 @@ class Bubble(object):
         self.x = int(self.x)
         self.y = int(self.y)
         print game.display, self.color, (self.x,  self.y),    self.radius
-        self.obj = pygame.draw.circle(game.display, self.color,
-                                      (self.x, self.y),
-                                      self.radius)
+        self.obj = pg.draw.circle(game.display, self.color,
+                                  (self.x, self.y),
+                                  self.radius)
         for bubble in game.bubbles.list:
             if self.obj is bubble.obj:
                 continue
@@ -110,8 +83,8 @@ class Pointer(object):
         self.x = self.base_x
         self.y = self.base_y + self.size
         self.angle = -90
-        pygame.draw.line(game.display, self.color,
-                         (self.base_x, self.base_y), (self.x, self.y), 3)
+        pg.draw.line(game.display, self.color,
+                     (self.base_x, self.base_y), (self.x, self.y), 3)
 
     def throw_the_bubble(self, game):
         print "throw_the_bubble"
@@ -130,17 +103,17 @@ class Pointer(object):
     #     self.x = self.base_x + math.cos(math.radians(angle)) * self.size
     #     self.y = self.base_y + math.sin(math.radians(angle)) * self.size
 
-    #     pygame.draw.line(game.display, self.color,
+    #     pg.draw.line(game.display, self.color,
     #                      (self.base_x, self.base_y), (self.x, self.y), 3)
     #     print self.x, self.base_x, self.y, self.base_y
 
     def handle_events(self, game, event):
-        if event.type == pygame.KEYDOWN:
-            if event.key in [pygame.K_RIGHT]:
+        if event.type == pg.KEYDOWN:
+            if event.key in [pg.K_RIGHT]:
                 self.angle += 10
-            if event.key in [pygame.K_LEFT]:
+            if event.key in [pg.K_LEFT]:
                 self.angle += -10
-            if event.key in [pygame.K_RETURN, pygame.K_SPACE] and not game.bubbles.some_moves:
+            if event.key in [pg.K_RETURN, pg.K_SPACE] and not game.bubbles.some_moves:
                 print "lanca a bolha"
                 self.throw_the_bubble(game)
         self.angle = min(self.angle, -10)
@@ -150,18 +123,18 @@ class Pointer(object):
         self.x = self.base_x + math.cos(math.radians(self.angle)) * self.size
         self.y = self.base_y + math.sin(math.radians(self.angle)) * self.size
 
-        pygame.draw.line(game.display, self.color,
-                         (self.base_x, self.base_y), (self.x, self.y), 3)
+        pg.draw.line(game.display, self.color,
+                     (self.base_x, self.base_y), (self.x, self.y), 3)
 
-        pygame.draw.line(game.display, self.color,
-                         (self.base_x, self.base_y), (self.x, self.y), 3)
+        pg.draw.line(game.display, self.color,
+                     (self.base_x, self.base_y), (self.x, self.y), 3)
 
 
 class Game(object):
     def __init__(self):
         self.cmd_key_down = False
-        self.clock = pygame.time.Clock()
-        self.display = pygame.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
+        self.clock = pg.time.Clock()
+        self.display = pg.display.set_mode((DISPLAY_WIDTH, DISPLAY_HEIGHT))
         self.pointer = Pointer(self)
         self.bubbles = Bubbles(self)
         self.loop()
@@ -169,29 +142,29 @@ class Game(object):
     def loop(self):
         while True:
             self.display.fill((0, 0, 0))
-            for event in pygame.event.get():
+            for event in pg.event.get():
                 self.handle_common_keys(event)
                 self.pointer.handle_events(self, event)
                 self.bubbles.handle_events(self, event)
             self.pointer.update(self)
             self.bubbles.update(self)
-            pygame.display.update()
+            pg.display.update()
             self.clock.tick(FPS)
 
     def handle_common_keys(self, event):
-        if event.type == pygame.QUIT:
+        if event.type == pg.QUIT:
             self.quit()
-        if event.type == pygame.KEYDOWN:
+        if event.type == pg.KEYDOWN:
             if event.key == 310:
                 self.cmd_key_down = True
-            if self.cmd_key_down and event.key == pygame.K_q:
+            if self.cmd_key_down and event.key == pg.K_q:
                 self.quit()
-        if event.type == pygame.KEYUP:
+        if event.type == pg.KEYUP:
             if event.key == 310:
                 self.cmd_key_down = False
 
     def quit(self):
-        pygame.quit()
+        pg.quit()
         quit()
 
 
